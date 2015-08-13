@@ -24,12 +24,7 @@ table["apk_version"] = args["apk_version"];--Android版本
 table["url_ios"] = args["url_ios"];--Ios URL
 table["ios_version"] = args["ios_version"];--Ios版本
 table["create_time"] = ngx.localtime();
---table["topic_game"] = 1;--topic or game  1 or 2
---table["subject_id"] = -1; --学科
---table["url_apk"] = "sff2323423"; --Android URL
---table["apk_version"] = "sff2323423";--Android版本
---table["url_ios"] = "sff2323fdgdgsdfgsdfgsd423";--Ios URL
---table["ios_version"] = "sff2323fdgdgsdfgsdfgsd423";--Ios版本
+
 local appModel = require "yxx.app.model.AppModel";
 appModel:upload_app(table);
 ngx.say("{\"success\":true,\"info\":\"上传成功\"}")

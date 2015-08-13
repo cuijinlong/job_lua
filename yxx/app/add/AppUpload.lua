@@ -15,6 +15,7 @@ if tonumber(args["topic_game"]) == "nil" then
     ngx.say("{\"success\":false,\"info\":\"class_id,teacher_id,question_id,content 参数错误\"}");
     return
 end
+
 local table = {};
 table["topic_game"] = tonumber(args["topic_game"]);--topic or game  1 or 2
 table["subject_id"] = args["subject_id"]; --学科

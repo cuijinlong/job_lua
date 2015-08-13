@@ -19,7 +19,7 @@ end
 local table = {};
 table["topic_game"] = tonumber(args["topic_game"]);--topic or game  1 or 2
 table["subject_id"] = args["subject_id"]; --学科
-table["url_apk"] = args["url_apk"]; --Android URL
+table["url_apk"] = args["url_apk"]; -- Android URL
 table["apk_version"] = args["apk_version"];--Android版本
 table["url_ios"] = args["url_ios"];--Ios URL
 table["ios_version"] = args["ios_version"];--Ios版本

@@ -25,6 +25,9 @@ table["url_ios"] = args["url_ios"];--Ios URL
 table["ios_version"] = args["ios_version"];--Ios版本
 table["create_time"] = ngx.localtime();
 
+
+
+
 local appModel = require "yxx.app.model.AppModel";
 appModel:upload_app(table);
 ngx.say("{\"success\":true,\"info\":\"上传成功\"}")

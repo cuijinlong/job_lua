@@ -1,0 +1,11 @@
+local tableUtil = require "yxx.tool.TableUtil";
+local table = {};
+table.yx_id = 1;
+table.yx_name = "预习名称";
+table.scheme_id = 200;
+table.structure_id = 20004;
+table.subject_id = 6;
+table.yx_conent = "预习内容";
+table.is_delete = 0;
+local sql = tableUtil:convert_update_sql(table);
+ngx.say(sql);

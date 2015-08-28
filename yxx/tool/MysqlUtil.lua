@@ -74,6 +74,31 @@ function _MysqlUtil:query(sql)
     return res;
 end
 
+--[[
+	函数说明： 	查询单个sql
+	参数：sql 	查询的sql语句
+]]
+function _MysqlUtil:querySingleSql(sql)
+    local db = _MysqlUtil:getDb();
+    local queryResult, err, errno, sqlstate = db: query(sql);
+    if not queryResult or queryResult == nil then
+        ngx.log(ngx.ERR, "[sj_log]->[DBUtil]-> sql语句执行出错：[err]-> [", err, "], [errno]-> [", errno, "], [sqlstate]->[", sqlstate, "]");
+        _MysqlUtil:keepDbAlive(db);
+        return false, err;
+    end
+    _MysqlUtil:keepDbAlive(db);
+    return queryResult;
+end
+
+function _MysqlUtil:keepDbAlive(db)
+    ok, err = db: set_keepalive(600000, v_pool_size);
+    if not ok then
+        ngx.log(ngx.ERR, "[sj_log]->[DBUtil]-> 将Mysql数据库连接归还连接池出错！");
+        return false;
+    end
+    return true;
+end
+
 ---------------------------------------------------------------------------
 --[[
 	局部函数：批量向mysql中插入数据
@@ -86,32 +111,25 @@ function _MysqlUtil:batch(sqlTable, pSize)
 
         local db = _MysqlUtil: getDb();
 
-        ngx.log(ngx.ERR, " ===> 批量执行sql语句 ===> ");
         local batchFlag = 0;
         for i=1, #sqlTable do
 
             sql = sql .. sqlTable[i];
             batchFlag = batchFlag + 1;
 
-            ngx.log(ngx.ERR, " ===> 第", i , "条SQL语句 ===> ", sqlTable[i]);
             if batchFlag == pSize or i==#sqlTable then
                 sql = sql .. "COMMIT;";
-                ngx.log(ngx.ERR, " ===> 批量提交的SQL语句 ===> ", sql);
                 local res, err, errno, sqlstate = db:query(sql)
                 if not res then
-                    ngx.log(ngx.ERR, "sql执行出错， 错误信息：err -> [", err, "], errno -> [", errno, "], sqlstate -> [", sqlstate, "].");
                     return false;
                 end
-
                 -- 因为是多个返回值，需要一直读取完成，否则不能返回到连接池
                 while err == "again" do
                     res, err, errno, sqlstate = db:read_result()
                     if not res then
-                        ngx.log(ngx.ERR, "sql执行出错， 错误信息：err -> [", err, "], errno -> [", errno, "], sqlstate -> [", sqlstate, "].");
                         return false;
                     end
                 end
-
                 batchFlag = 0;
                 sql = "START TRANSACTION;";
             end

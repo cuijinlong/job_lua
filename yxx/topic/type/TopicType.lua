@@ -20,4 +20,5 @@ end
 local topic_type_name = args["topic_type_name"];
 local topicModel = require "yxx.topic.model.TopicModel";
 topicModel:add_type(subject_id,topic_type_name);
+
 ngx.say("{\"success\":true,\"info\":\"保存成功\"}");

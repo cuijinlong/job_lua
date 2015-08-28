@@ -142,7 +142,7 @@ for i=1,#game do
 	tab["gamethumb"]=gamecount[8]
 	tab["gametype"]=gamecount[10]
 	tab["playcount"]=gamecount[12]
-	local student = ngx.location.capture("/dsideal_yy/teacher/student/getStudntNameByID\",
+	local student = ngx.location.capture("/dsideal_yy/ypt/student/getStudntNameByID\",
 	{
 		--body="id="..person_id
 		args={id=person_id}

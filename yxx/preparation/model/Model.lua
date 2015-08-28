@@ -63,24 +63,26 @@ end
 --[[
 	局部函数：发布测评
 ]]
-function _PreparationModel:YxPublic(cp_person_insert_sql_table,yx_person_insert_sql_table)
+function _PreparationModel:YxPublic(cp_person_insert_sql,yx_person_insert_sql)
     local MysqlUtil = require "yxx.tool.MysqlUtil";
     local tableUtil = require "yxx.tool.TableUtil";
     local sqlTable  = {};
     local db = MysqlUtil:getDb();
-    if cp_person_insert_sql_table then
-        for i=1,#cp_person_insert_sql_table do
-            sqlTable = tableUtil:concat(sqlTable,cp_person_insert_sql_table[i]);
-        end
+    if cp_person_insert_sql and string.len(cp_person_insert_sql) > 0 then
+        sqlTable[1] = cp_person_insert_sql;
     end
-    sqlTable = tableUtil:concat(sqlTable,yx_person_insert_sql_table);
+    if yx_person_insert_sql and string.len(yx_person_insert_sql)>0 then
+        sqlTable[#sqlTable+1] = yx_person_insert_sql;
+    end
+    --sqlTable = tableUtil:concat(sqlTable,yx_person_insert_sql_table);
+    local db = MysqlUtil:getDb();
     local success = MysqlUtil:batch(sqlTable,#sqlTable);
     MysqlUtil:close(db);
-    --    local cjson = require "cjson"
-    --    local success = "true";
-    --    cjson.encode_empty_table_as_object(false);
-    --    local responseJson = cjson.encode(sqlTable);
-    --    ngx.say(responseJson);
+--        local cjson = require "cjson"
+--       local success = "true";
+--       cjson.encode_empty_table_as_object(false);
+--       local responseJson = cjson.encode(sqlTable);
+--       ngx.say(responseJson);
     return success;
 end
 
@@ -94,9 +96,9 @@ end
 	page_number：当前页码
 ]]
 function _PreparationModel:yxList(subject_id,prson_id,identity_id,yx_name,structure_id,sort_type,sort_order,page_size,page_number)
-    local dbUtil = require "yxx.tool.DbUtil";
+    local MysqlUtil = require "yxx.tool.MysqlUtil";
     local ssdbUtil = require "yxx.tool.SSDBUtil";
-    local mysql_db = dbUtil:getMysqlDb();
+    local mysql_db = MysqlUtil:getDb();
     local query_order_model = "";
     local query_order = "";
     local query_condition = "";
@@ -151,7 +153,7 @@ function _PreparationModel:yxList(subject_id,prson_id,identity_id,yx_name,struct
         table.insert(yxVoArray,yx_vo);
     end
     local yxListJson = {success=true,total_row=total_row,total_page=total_page,page_number=page_number,page_size=page_size,list=yxVoArray};
-    mysql_db:set_keepalive(0,v_pool_size);
+    MysqlUtil:close(mysql_db);
 return yxListJson;
 end
 

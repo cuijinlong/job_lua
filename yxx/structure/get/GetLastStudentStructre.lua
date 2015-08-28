@@ -17,7 +17,8 @@ local student_id = args["student_id"];
 local subject_id = args["subject_id"];
 local model_id = args["model_id"];
 if  not student_id or string.len(student_id) == 0
-        or not model_id or string.len(model_id) == 0  then
+        or not model_id or string.len(model_id) == 0
+            or not subject_id or string.len(subject_id) == 0 then
     say("{\"success\":false,\"info\":\"参数错误！\"}");
     return
 end

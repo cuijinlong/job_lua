@@ -14,7 +14,7 @@ function _ZyModel:save_zy_parse_paper(paper_id)
     local zg_flag=1;
     local kgs={};--格式化试卷中客观题信息
     local kg_flag=1;
-    local papers = ngx.location.capture("/dsideal_yy/teacher/zy/papertitlelist",{
+    local papers = ngx.location.capture("/dsideal_yy/ypt/zy/papertitlelist",{
         body="paper_id_char="..paper_id
     });--改之后的获取格式化试卷信息
     local paper;

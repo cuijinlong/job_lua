@@ -7,10 +7,10 @@ local _WrongQuestion = {};
 	ssdb_info：错题记录信息
 ]]
 local log = require("social.common.log")
-log.outfile = "/tmp/student.log";
+log.outfile = "/tmp/yxx.log";
 log.level="trace"
 function _WrongQuestion:wq_save(ssdb_info)
-	local dbUtil = require "student.wrong_question_book.util.DbUtil";
+	local dbUtil = require "yxx.wrong_question_book.util.DbUtil";
 	local ssdb_db = dbUtil:getSSDb();
 	local mysql_db = dbUtil:getMysqlDb();
 	local wq_id = ssdb_db:incr("wrong_question_book_pk");--生成主键ID
@@ -65,7 +65,7 @@ function _WrongQuestion:wq_save(ssdb_info)
 end
 
 function _WrongQuestion:zg_wq_save(ssdb_info)
-    local dbUtil = require "student.wrong_question_book.util.DbUtil";
+    local dbUtil = require "yxx.wrong_question_book.util.DbUtil";
     local ssdb_db = dbUtil:getSSDb();
     local mysql_db = dbUtil:getMysqlDb();
     local wq_id = ssdb_db:incr("wrong_question_book_pk");--生成主键ID
@@ -127,7 +127,7 @@ end
 ]]
 
 function _WrongQuestion:wq_is_exsit(student_id,question_id)
-	local dbUtil = require "student.wrong_question_book.util.DbUtil";
+	local dbUtil = require "yxx.wrong_question_book.util.DbUtil";
 	local ssdb_db = dbUtil:getSSDb();
 	local is_exsit = ssdb_db:exists("wrong_question_exsit_v34_"..student_id.."_"..question_id);--判断错题存在否
 	ssdb_db:set_keepalive(0,v_pool_size);
@@ -143,7 +143,7 @@ end
 function _WrongQuestion:wq_rate(class_id,question_id,subject_id,knowledge_point_ids,knowledge_point_codes,question_type_id,question_type_name,nd_id,nd_name,is_wrong_right)
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
 	--初始化
-	local dbUtil = require "student.wrong_question_book.util.DbUtil";
+	local dbUtil = require "yxx.wrong_question_book.util.DbUtil";
 	local ssdb_db = dbUtil:getSSDb();
 	local mysql_db = dbUtil:getMysqlDb();
 	local wrong_count = 0;
@@ -210,7 +210,7 @@ end
 function _WrongQuestion:person_wq_list(student_id,subject_id,create_source,cause_content,knowledge_point_code,is_include_know,sort_type,sort_num,page_size,page_number)
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
 	--初始化变量
-	local dbUtil = require "student.wrong_question_book.util.DbUtil";
+	local dbUtil = require "yxx.wrong_question_book.util.DbUtil";
 	local ssdb_db = dbUtil:getSSDb();
 	local mysql_db = dbUtil:getMysqlDb();
 	local total_row	= 0;
@@ -228,8 +228,8 @@ function _WrongQuestion:person_wq_list(student_id,subject_id,create_source,cause
 		query_condition = query_condition.." and t1.cause_content="..cause_content;
 	end
 	if knowledge_point_code ~= -1 then
-		query_condition = query_condition.." and t1.knowledge_point_codes like '%,"..knowledge_point_code..",%' ";
-	end
+        query_condition = query_condition.." and (t1.knowledge_point_codes like '%,"..knowledge_point_code..",%' or t1.knowledge_point_codes ='') ";
+    end
 	if is_include_know == 0 then
 		query_condition = query_condition.." and is_delete=0";--is_delete  1：我会了   0：我不会
 	end
@@ -319,7 +319,7 @@ end
 function _WrongQuestion:class_wq_list(class_id,subject_id,knowledge_point_code,question_type_id,nd_id,sort_type,sort_num,page_size,page_number)
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
 	--初始化变量
-	local dbUtil = require "student.wrong_question_book.util.DbUtil";
+	local dbUtil = require "yxx.wrong_question_book.util.DbUtil";
 	local ssdb_db = dbUtil:getSSDb();
 	local mysql_db = dbUtil:getMysqlDb();
 	local total_row	= 0;
@@ -339,9 +339,10 @@ function _WrongQuestion:class_wq_list(class_id,subject_id,knowledge_point_code,q
 		query_condition = query_condition.." AND nd_id="..nd_id.." ";
 	end
 	if knowledge_point_code ~= nil and knowledge_point_code ~= -1 then
-		query_condition = query_condition.." AND knowledge_point_codes like '%,"..knowledge_point_code..",%' ";
+        query_condition = query_condition.." and (knowledge_point_codes like '%,"..knowledge_point_code..",%' or knowledge_point_codes ='') ";
 	end
 
+    
 	if sort_type == 1 then
 		if sort_num == 1 then
 			query_order = " ORDER BY last_wrong_time DESC";
@@ -418,13 +419,18 @@ end
 	is_delete：会/不会
 ]]
 function _WrongQuestion:wq_edit(wq_id,create_source,cause_content,is_delete)
-	local dbUtil = require "student.wrong_question_book.util.DbUtil";
+	local dbUtil = require "yxx.wrong_question_book.util.DbUtil";
 	local ssdb_db = dbUtil:getSSDb();
 	local mysql_db = dbUtil:getMysqlDb();
 	--保存错题本（ssdb）
-	ssdb_db:multi_hset("wrong_question_book_v34_"..wq_id,"create_source",create_source,"cause_content",cause_content,"is_delete",is_delete);
+    if is_delete ~= nil then
+        ssdb_db:multi_hset("wrong_question_book_v34_"..wq_id,"create_source",create_source,"cause_content",cause_content,"is_delete",is_delete);
+        mysql_db:query("update t_wrong_question_book set create_source="..create_source..",cause_content="..cause_content..",is_delete="..is_delete.." where wq_id="..wq_id..";");
+    else
+        ssdb_db:multi_hset("wrong_question_book_v34_"..wq_id,"create_source",create_source,"cause_content",cause_content);
+        mysql_db:query("update t_wrong_question_book set create_source="..create_source..",cause_content="..cause_content.." where wq_id="..wq_id..";");
+    end
 	--保存错题本（mysql）
-	mysql_db:query("update t_wrong_question_book set create_source="..create_source..",cause_content="..cause_content..",is_delete="..is_delete.." where wq_id="..wq_id..";");
 	------------------------------------------------------------------------------------------------------------------------------------------------------
 	ssdb_db:set_keepalive(0,v_pool_size);
 	mysql_db:set_keepalive(0,v_pool_size);
@@ -436,7 +442,7 @@ end
 	question_id：试题ID
 ]]
 function _WrongQuestion:more_once_wq(student_id,question_id,stu_answer)
-	local dbUtil = require "student.wrong_question_book.util.DbUtil";
+	local dbUtil = require "yxx.wrong_question_book.util.DbUtil";
 	local ssdb_db = dbUtil:getSSDb();
 	local mysql_db = dbUtil:getMysqlDb();
 	local wq_id = ssdb_db:get("wrong_question_exsit_v34_"..student_id.."_"..question_id);
@@ -456,7 +462,7 @@ end
 	wq_id：错题本id
 ]]
 function _WrongQuestion:wq_delete(student_id,question_id,wq_id)
-	local dbUtil = require "student.wrong_question_book.util.DbUtil";
+	local dbUtil = require "yxx.wrong_question_book.util.DbUtil";
 	local mysql_db = dbUtil:getMysqlDb();
 	local ssdb_db = dbUtil:getSSDb();
 	--删除本人错题的记录表，以便下次再做错此题，依然进入错题本。
@@ -473,16 +479,16 @@ end
 	question_id:试题ID
 	class_id:班级
 ]]
-function _WrongQuestion:wq_all_stu_list(question_id,class_id)
+function _WrongQuestion:wq_all_stu_list(question_id,class_ids)
 	--初始化变量
-	local dbUtil = require "student.wrong_question_book.util.DbUtil";
+	local dbUtil = require "yxx.wrong_question_book.util.DbUtil";
 	local pseronUtil = require "base.person.model.PersonInfoModel";
 	local studentModel = require "base.student.model.Student";
 	local ssdb_db = dbUtil:getSSDb();
 	local mysql_db = dbUtil:getMysqlDb();
 	local query_condition = " AND question_id="..question_id;
 	if class_id ~= -1 then
-		query_condition = query_condition.." AND class_id="..class_id;
+		query_condition = query_condition.." AND class_id in ("..class_ids..")";
 	end
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
 	local query_sql = "select wq_id from t_wrong_question_book where 1=1"..query_condition.." order by create_time desc;";

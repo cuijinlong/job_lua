@@ -8,7 +8,7 @@ local _WqDiscuss= {};
 	ssdb_info：消息的内容
 ]]
 function _WqDiscuss:send_message(ssdb_info)
-	local dbUtil = require "student.wrong_question_book.util.DbUtil";
+	local dbUtil = require "yxx.wrong_question_book.util.DbUtil";
 	local ssdb_db = dbUtil:getSSDb();
 	local mysql_db = dbUtil:getMysqlDb();
 	--保存错题本（ssdb、mysql）
@@ -58,7 +58,7 @@ end
 function _WqDiscuss:message_list(question_id,class_id)
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
 	--初始化变量
-	local dbUtil = require "student.wrong_question_book.util.DbUtil";
+	local dbUtil = require "yxx.wrong_question_book.util.DbUtil";
 	local ssdb_db = dbUtil:getSSDb();
 	local mysql_db = dbUtil:getMysqlDb();
 	local wqDiscussArray  = {};

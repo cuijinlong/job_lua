@@ -37,18 +37,20 @@ elseif tonumber(is_public) == 1 then
     --第三步：组装预习对象的Vo-----------------------------------------------------------------------------------------------------------------------------------------------------------
     local person_table_arrs = studentModel:getPersonTableArrs(class_ids,group_ids); --通过班级和组查询基础数据
     --表名：t_yx_person（预习参与人）
-    local yx_person_insert_sql_table = yxPersonModel:getPersonInsertSqlTable(yx_id, person_table_arrs); --组装预习参与人的insert语句
-    local cp_person_insert_sql_table = {}; --组装预习中测评的参与人的insert语句
+    local yx_person_insert_sql = yxPersonModel:getPersonInsertSqlTable(yx_id, person_table_arrs); --组装预习参与人的insert语句
     local cp_id_arrs = cpModel:getCpIdByBusIdAndCpTypeId(yx_id,2);--通过bus_id，cp_type_id获得cp_id数组
+    --ngx.log(ngx.ERR,"###########"..#cp_id_arrs);
+    local cp_person_insert_sql = "";--组装预习中测评的参与人的insert语句
     for i = 1,#cp_id_arrs do
         --表名：t_cp_person（测评参与人）
-        table.insert(cp_person_insert_sql_table, cpPersonModel:getPersonInsertSqlTable(cp_id_arrs[i].cp_id,yx_id,2, person_table_arrs));
+        cp_person_insert_sql = cp_person_insert_sql..cpPersonModel:getPersonInsertSqlTable(tonumber(cp_id_arrs[i]),yx_id,2, person_table_arrs)
+        --table.insert(cp_person_insert_sql_table,);
     end
     local success = "";
     --第四步：保存到数据库（方式：1、发布；2、不发布）-----------------------------------------------------------------------------------------------------------------------------------------------------------
     success = preparetionModel:YxPublic(
-        cp_person_insert_sql_table, --组装预习中测评的参与人的insert语句
-        yx_person_insert_sql_table --表名：t_yx_person（预习参与人）
+        cp_person_insert_sql, --组装预习中测评的参与人的insert语句
+        yx_person_insert_sql --表名：t_yx_person（预习参与人）
     );
     if tostring(success) == "true" then
         local yx_update_table = {};
@@ -61,4 +63,4 @@ elseif tonumber(is_public) == 1 then
     end
 end
 
-SSDBUtil:_keepAlive();
+ssdb:set_keepalive(0,v_pool_size);

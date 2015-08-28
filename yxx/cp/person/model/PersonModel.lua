@@ -9,10 +9,15 @@ local _Person = {};
 ]]
 function _Person:getPersonInsertSqlTable(cp_id,bus_id,cp_type_id,person_table)
     local tableUtil = require "yxx.tool.TableUtil";
-    local person_sql_table = {};
-    if person_table then
+    local _SSDBUtil = require "yxx.tool.SSDBUtil";
+    local TS = require "resty.TS";
+    local person_insert_sql = "";
+    if person_table and #person_table>0 then
         for i=1,#person_table do
+            local update_ts = TS.getTs();
+            local id = _SSDBUtil:incr("t_cp_cptoperson_pk");
             local person_vo = {};
+            person_vo.id = tonumber(id);
             person_vo.cp_id = tonumber(cp_id);
             person_vo.bus_id = tonumber(bus_id);
             person_vo.cp_type_id = tonumber(cp_type_id);
@@ -25,11 +30,18 @@ function _Person:getPersonInsertSqlTable(cp_id,bus_id,cp_type_id,person_table)
             end
             person_vo.sum_score = 0;--测评得分
             person_vo.submit_state = 0;--0:未提交   1：已提交
+            person_vo.update_ts = update_ts;
             local k_v_table = tableUtil:convert_sql(person_vo);
-            person_sql_table[i] = "insert into t_cp_person("..k_v_table["k_str"]..") value("..k_v_table["v_str"]..");"
+            if i == 1 then
+                person_insert_sql = "insert into t_cp_person("..k_v_table["k_str"]..") values ";
+            elseif i == #person_table then
+                person_insert_sql = person_insert_sql.." ("..k_v_table["v_str"]..");";
+            else
+                person_insert_sql = person_insert_sql.." ("..k_v_table["v_str"].."),";
+            end
         end
     end
-    return person_sql_table;
+    return person_insert_sql;
 end
 
 --[[

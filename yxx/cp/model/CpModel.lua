@@ -60,8 +60,18 @@ end
 ]]
 local function getCpInsertSql(self,cp_table)
     local tableUtil = require "yxx.tool.TableUtil";
+    local SSDBUtil = require "yxx.tool.SSDBUtil";
+    local TS = require "resty.TS";
+    local cptoperson_id = tonumber(SSDBUtil:incr("t_cp_cptoperson_pk"));
     local k_v_table = tableUtil:convert_sql(cp_table);
-    local insert_sql = "insert into t_cp_info("..k_v_table["k_str"]..") value("..k_v_table["v_str"]..");"
+    local insert_sql = "insert into t_cp_info("..k_v_table["k_str"]..") value("..k_v_table["v_str"]..");"..
+                       "insert into t_cp_person(id,cp_id,bus_id,cp_type_id,person_id,identity_id,bureau_id,class_id,group_id,update_ts) value("..
+                                                tonumber(cptoperson_id)..","..cp_table.cp_id..","..cp_table.bus_id..","..cp_table.cp_type_id..","..
+                                                "0,0,0,0,0,"..TS.getTs()..");";
+
+    local ssdb = SSDBUtil:getDb();
+    ssdb:multi_hset("cptoperson_"..cptoperson_id,"cp_id",cp_table.cp_id);--rows[i].id：测评人员表的ID
+    SSDBUtil:keepAlive();
     return insert_sql;
 end
 _Cp.getCpInsertSql = getCpInsertSql;
@@ -87,13 +97,21 @@ _Cp.getCpAndQuestionSql = getCpAndQuestionSql;
 	cp_type_id: 作业：1   预习：2
 ]]
 function _Cp:getCpIdByBusIdAndCpTypeId(bus_id,cp_type_id)
-    local sql = "select cp_id from t_cp_info where bus_id="..bus_id.." and cp_type_id="..cp_type_id;
-    local DBUtil = require "common.DBUtil";
-    local queryResult = DBUtil:querySingleSql(sql);
-    if not queryResult then
-        return {};
+    local MysqlUtil = require "yxx.tool.MysqlUtil";
+    local SSDBUtil = require "yxx.tool.SSDBUtil";
+    local db = MysqlUtil:getDb();
+    local ssdb = SSDBUtil:getDb();
+    local query_sql = "SELECT SQL_NO_CACHE id FROM t_cp_person_sphinxse where QUERY=\'filter=bus_id,"..bus_id..";filter=cp_type_id,"..cp_type_id..";filter=class_id,0;filter=group_id,0;\';SHOW ENGINE SPHINX  STATUS;";
+    local rows = db:query(query_sql);
+    db:read_result()
+    local return_table = {};
+    for i=1,#rows do
+        local cp_id = ssdb:multi_hget("cptoperson_"..rows[i].id,"cp_id");--rows[i].id：测评人员表的ID
+        return_table[i]= tonumber(cp_id[2]);
     end
-    return queryResult;
+    MysqlUtil:close(db);
+    SSDBUtil:keepAlive();
+    return return_table;
 end
 
 return _Cp;

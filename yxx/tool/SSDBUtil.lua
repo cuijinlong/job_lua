@@ -97,7 +97,7 @@ end
 
 function  _SSDBUtil.multi_hset(self, name, kvTable)
     local cjson = require "cjson";
-    ngx.log(ngx.ERR, " 参数：name: [", name, "], kvTable: [", cjson.encode(kvTable), "]");
+    --ngx.log(ngx.ERR, " 参数：name: [", name, "], kvTable: [", cjson.encode(kvTable), "]");
     local ssdb = self:getDb();
 
     local paramTable = {};    

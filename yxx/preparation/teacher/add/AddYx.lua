@@ -16,8 +16,8 @@ local cpPersonModel = require "yxx.cp.person.model.PersonModel"; --测评的表
 local studentModel = require "yxx.student.model.StudentModel";
 local preparetionModel = require "yxx.preparation.model.Model";
 local parameterUtil = require "yxx.tool.ParameterUtil";
-local param_json = parameterUtil:getStrParam("param_json","");
---local param_json = "ewogICAgInl4X25hbWUiOiAi6aKE5Lmg5ZCN56ewIiwKICAgICJjcmVhdGVfdGltZSI6ICIyMDE1LTctNSAwMDowMDowMCIsCiAgICAiY2xhc3NfaWRzIjogIjEwLDEyIiwKICAgICJncm91cF9pZHMiOiAiIiwKICAgICJwZXJzb25faWQiOiA1MDEsCiAgICAiaWRlbnRpdHlfaWQiOiA2LAogICAgInNjaGVtZV9pZCI6IDIsCiAgICAic3RydWN0dXJlX2lkIjogMywKICAgICJzdWJqZWN0X2lkIjogNCwKICAgICJ5eF9jb25lbnQiOiAi6aKE5Lmg6K+05piOIiwKICAgICJpc19kZWxldGUiOiAwLAogICAgImlzX3B1YmxpYyI6IDAsCiAgICAidHJhaW5fbGlzdCI6IFsKICAgICAgICB7CiAgICAgICAgICAgICJ0cmFpbl9uYW1lIjogIueOr+iKguWQjeensDEiLAogICAgICAgICAgICAidHJhaW5fY29udGVudCI6ICLnjq/oioLor7TmmI4xIiwKICAgICAgICAgICAgIm1hdGVyaWFsX2xpc3QiOiBbCiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICAgInJlc291cmNlX3R5cGUiOiAxMSwKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfaWQiOiAxMDAxCiAgICAgICAgICAgICAgICB9LAogICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZV90eXBlIjogMTIsCiAgICAgICAgICAgICAgICAgICAgInJlc291cmNlX2lkIjogMTAwMgogICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfdHlwZSI6IDIsCiAgICAgICAgICAgICAgICAgICAgInBhcGVyX3NvdXJjZSI6IDEsCiAgICAgICAgICAgICAgICAgICAgInJlc291cmNlX2lkIjogMTAwMwogICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfdHlwZSI6IDE0LAogICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZV9pZCI6IDEwMDQKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgXQogICAgICAgIH0sCiAgICAgICAgewogICAgICAgICAgICAidHJhaW5fbmFtZSI6ICLnjq/oioLlkI3np7AyIiwKICAgICAgICAgICAgInRyYWluX2NvbnRlbnQiOiAi546v6IqC6K+05piOMSIsCiAgICAgICAgICAgICJtYXRlcmlhbF9saXN0IjogWwogICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZV90eXBlIjogMjEsCiAgICAgICAgICAgICAgICAgICAgInJlc291cmNlX2lkIjogMjAwMQogICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfdHlwZSI6IDIzLAogICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZV9pZCI6IDIwMDMKICAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICAgInJlc291cmNlX3R5cGUiOiAyNCwKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfaWQiOiAyMDA0CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIF0KICAgICAgICB9LAogICAgICAgIHsKICAgICAgICAgICAgInRyYWluX25hbWUiOiAi546v6IqC5ZCN56ewMyIsCiAgICAgICAgICAgICJ0cmFpbl9jb250ZW50IjogIueOr+iKguivtOaYjjMiLAogICAgICAgICAgICAibWF0ZXJpYWxfbGlzdCI6IFsKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfdHlwZSI6IDMxLAogICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZV9pZCI6IDMwMDEKICAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICAgInJlc291cmNlX3R5cGUiOiAyMiwKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfaWQiOiAyMDAyCiAgICAgICAgICAgICAgICB9LAogICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZV90eXBlIjogMjMsCiAgICAgICAgICAgICAgICAgICAgInJlc291cmNlX2lkIjogMzAwMwogICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfdHlwZSI6IDM0LAogICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZV9pZCI6IDMwMDQKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgXQogICAgICAgIH0KICAgIF0KfQ==";
+--local param_json = parameterUtil:getStrParam("param_json","");
+local param_json = "ewogICAgInl4X25hbWUiOiAi6aKE5Lmg5ZCN56ewIiwKICAgICJjcmVhdGVfdGltZSI6ICIyMDE1LTctNSAwMDowMDowMCIsCiAgICAiY2xhc3NfaWRzIjogIjEwLDEyIiwKICAgICJncm91cF9pZHMiOiAiIiwKICAgICJwZXJzb25faWQiOiA1MDEsCiAgICAiaWRlbnRpdHlfaWQiOiA2LAogICAgInNjaGVtZV9pZCI6IDIsCiAgICAic3RydWN0dXJlX2lkIjogMywKICAgICJzdWJqZWN0X2lkIjogNCwKICAgICJ5eF9jb25lbnQiOiAi6aKE5Lmg6K+05piOIiwKICAgICJpc19kZWxldGUiOiAwLAogICAgImlzX3B1YmxpYyI6IDAsCiAgICAidHJhaW5fbGlzdCI6IFsKICAgICAgICB7CiAgICAgICAgICAgICJ0cmFpbl9uYW1lIjogIueOr+iKguWQjeensDEiLAogICAgICAgICAgICAidHJhaW5fY29udGVudCI6ICLnjq/oioLor7TmmI4xIiwKICAgICAgICAgICAgIm1hdGVyaWFsX2xpc3QiOiBbCiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICAgInJlc291cmNlX3R5cGUiOiAxMSwKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfaWQiOiAxMDAxCiAgICAgICAgICAgICAgICB9LAogICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZV90eXBlIjogMTIsCiAgICAgICAgICAgICAgICAgICAgInJlc291cmNlX2lkIjogMTAwMgogICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfdHlwZSI6IDIsCiAgICAgICAgICAgICAgICAgICAgInBhcGVyX3NvdXJjZSI6IDEsCiAgICAgICAgICAgICAgICAgICAgInJlc291cmNlX2lkIjogMTAwMwogICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfdHlwZSI6IDE0LAogICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZV9pZCI6IDEwMDQKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgXQogICAgICAgIH0sCiAgICAgICAgewogICAgICAgICAgICAidHJhaW5fbmFtZSI6ICLnjq/oioLlkI3np7AyIiwKICAgICAgICAgICAgInRyYWluX2NvbnRlbnQiOiAi546v6IqC6K+05piOMSIsCiAgICAgICAgICAgICJtYXRlcmlhbF9saXN0IjogWwogICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZV90eXBlIjogMjEsCiAgICAgICAgICAgICAgICAgICAgInJlc291cmNlX2lkIjogMjAwMQogICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfdHlwZSI6IDIzLAogICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZV9pZCI6IDIwMDMKICAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICAgInJlc291cmNlX3R5cGUiOiAyNCwKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfaWQiOiAyMDA0CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIF0KICAgICAgICB9LAogICAgICAgIHsKICAgICAgICAgICAgInRyYWluX25hbWUiOiAi546v6IqC5ZCN56ewMyIsCiAgICAgICAgICAgICJ0cmFpbl9jb250ZW50IjogIueOr+iKguivtOaYjjMiLAogICAgICAgICAgICAibWF0ZXJpYWxfbGlzdCI6IFsKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfdHlwZSI6IDMxLAogICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZV9pZCI6IDMwMDEKICAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICAgInJlc291cmNlX3R5cGUiOiAyMiwKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfaWQiOiAyMDAyCiAgICAgICAgICAgICAgICB9LAogICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZV90eXBlIjogMjMsCiAgICAgICAgICAgICAgICAgICAgInJlc291cmNlX2lkIjogMzAwMwogICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VfdHlwZSI6IDM0LAogICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZV9pZCI6IDMwMDQKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgXQogICAgICAgIH0KICAgIF0KfQ==";
 if not param_json or string.len(param_json) == 0 then
     say("{\"success\":false,\"info\":\"参数错误！\"}");
     return
@@ -68,29 +68,27 @@ if param_table.train_list and #param_table.train_list > 0 then
         end
         if #material_table > 0 then
             for j = 1, #material_table do
-                if material_table[j].resource_type
-                        and string.len(material_table[j].resource_type) > 0
-                        and material_table[j].resource_id
-                        and string.len(material_table[j].resource_id) > 0 then
+                if material_table[j].resource_type and string.len(material_table[j].resource_type) > 0
+                        and material_table[j].resource_id  and string.len(material_table[j].resource_id) > 0 then
                     table.insert(material_table_arrs, materialModel:getMaterialVo(train_vo.train_id, material_table[j])); --素材数组
                     --如果格式化试卷，要添加到测评表 start
-                    if tonumber(material_table[j].resource_type) == 2
-                            and material_table[j].paper_source
+                    if tonumber(material_table[j].resource_type) == 2 and material_table[j].paper_source
                             and tonumber(material_table[j].paper_source) == 1 then
                         local cp_table = {};
-                        cp_table.parent_id = -1;
-                        cp_table.cp_id = tonumber(SSDBUtil:incr("ceping_moudel_pk"));
-                        cp_table.cp_name = yx_table.yx_name; --测评名称
-                        cp_table.bus_id = yx_table.yx_id; --业务ID
-                        cp_table.create_time = ngx.localtime(); --创建时间
-                        cp_table.paper_id = tonumber(material_table[j].resource_id); --试卷ID
-                        cp_table.cp_type_id = 2; --1:作业 2:测评
-                        cp_table.person_id = yx_table.person_id; --创建人ID
-                        cp_table.identity_id = yx_table.identity_id; --创建人身份
-                        cp_table.scheme_id = yx_table.scheme_id; -- 教材版本ID
+                        cp_table.parent_id    = -1;
+                        cp_table.cp_id        = tonumber(SSDBUtil:incr("ceping_moudel_pk"));
+                        cp_table.cp_name      = yx_table.yx_name; --测评名称
+                        cp_table.bus_id       = yx_table.yx_id; --业务ID
+                        cp_table.create_time  = ngx.localtime(); --创建时间
+                        cp_table.paper_id     = tonumber(material_table[j].resource_id); --试卷ID
+                        cp_table.cp_type_id   = 2; --1:作业 2:测评
+                        cp_table.person_id    = yx_table.person_id; --创建人ID
+                        cp_table.identity_id  = yx_table.identity_id; --创建人身份
+                        cp_table.scheme_id    = yx_table.scheme_id; -- 教材版本ID
                         cp_table.structure_id = yx_table.structure_id; --版本章节目录
-                        cp_table.subject_id = yx_table.subject_id; --学科ID
+                        cp_table.subject_id   = yx_table.subject_id; --学科ID
                         table.insert(cp_table_arrs, cp_table);--测评VO数组
+                        --SSDBUtil:multi_hset("cp_moudel_info_"..cp_table.cp_id,cp_table);
                     end
                     --如果格式化试卷，要添加到测评表 end
                 else
@@ -102,17 +100,14 @@ if param_table.train_list and #param_table.train_list > 0 then
         --组装环节中素材的Vo数组 end
     end
     if #train_table_arrs > 0 then
-        --表名：t_yx_train（预习环节）
-        tain_insert_sql_table = trainModel:getTrainInsertSqlArrstable(train_table_arrs);
+        tain_insert_sql_table = trainModel:getTrainInsertSqlArrstable(train_table_arrs);--表名：t_yx_train（预习环节）
     end
     if #material_table_arrs > 0 then
-        --表名：t_yx_material（预习素材）
-        material_inser_sql_table = materialModel:getMaterialInsertSqlArrstable(material_table_arrs);
+        material_inser_sql_table = materialModel:getMaterialInsertSqlArrstable(material_table_arrs);--表名：t_yx_material（预习素材）
     end
     if #cp_table_arrs > 0 then
         for i = 1, #cp_table_arrs do
-            --表名：t_cp_info（测评主表）
-            table.insert(cp_sql_table, cpModel:CpMoudelInsertSql(cp_table_arrs[i]))
+            table.insert(cp_sql_table, cpModel:CpMoudelInsertSql(cp_table_arrs[i])); --表名：t_cp_info（测评主表）
         end
     end
 end
@@ -145,8 +140,8 @@ elseif tonumber(param_table.is_public) == 1 then
                                                      );
 end
 if tostring(success) == "true" then
-    preparetionModel:saveYxToSsdb(yx_table.yx_id,param_table);
-    SSDBUtil:multi_hset("yx_moudel_info_"..yx_table.yx_id,yx_table);
+    --preparetionModel:saveYxToSsdb(yx_table.yx_id,param_table);
+    --SSDBUtil:multi_hset("yx_moudel_info_"..yx_table.yx_id,yx_table);
     say("{\"success\":" .. tostring(success) .. ",\"info\":\"保存成功\"}");
 else
     say("{\"success\":false,\"info\":\"保存失败\"}");

@@ -15,13 +15,12 @@ else
 end
 local student_id = args["student_id"];
 local record_count = args["record_count"];
-local android_ios = args["android_ios"];
 if not student_id or string.len(student_id) == 0 or not record_count or string.len(record_count) == 0 then
     say("{\"success\":false,\"info\":\"student_id、record_count:不能为空！\"}")
     return
 end
 local TopicModel = require "yxx.topic.model.TopicModel";
-local topicListJson = TopicModel:topic_student_list(student_id,record_count,android_ios);
+local topicListJson = TopicModel:topic_student_list(student_id,record_count);
 cjson.encode_empty_table_as_object(false);
 local responseJson = cjson.encode(topicListJson);
 say(responseJson);

@@ -58,7 +58,7 @@ person_str = "filter=TEACHER_ID,"..teacher_id..";"
 
 --判断是否有结点ID参数
 if not nid or string.len(nid)==0 then
-    ngx.say("{\"success\":false,\"info\":\"nid参数错误！\"}")
+    ngx.say("{\"success\":false,\"info\":\"版本结构树初始化失败！\"}")
     return
 end
 if not scheme_id or string.len(scheme_id)==0 then

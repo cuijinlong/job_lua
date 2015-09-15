@@ -47,9 +47,9 @@ local structure_id_char = char_id[1];
 local scheme_id_char = char_id[2];
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 local paper_info = ZyModel:save_zy_parse_paper(param.paper_list);
-param.zg = paper_info.zg;--格式化试卷主观题信息
-param.kg = paper_info.kg;--格式化试卷客观题信息
-param.fgsh = paper_info.fgsh; --非格式化试卷
+param.zg = paper_info.zg;       --格式化试卷主观题信息
+param.kg = paper_info.kg;       --格式化试卷客观题信息
+param.fgsh = paper_info.fgsh;   --非格式化试卷
 param.create_time = os.date("%Y-%m-%d %H:%M:%S");
 param.zy_id = zy_id;
 param.teacher_id = teacher_id;

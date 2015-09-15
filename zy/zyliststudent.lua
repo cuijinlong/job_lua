@@ -48,9 +48,13 @@ local structure_id = args["structure_id"]
 local pageNumber = args["pageNumber"]
 --一页显示多少
 local pageSize = args["pageSize"]
---学生id
-local student_id = ngx.var.cookie_person_id
---local student_id="400292"
+
+local student_id = "";
+if args["student_id"] and tostring(args["student_id"]) ~= 'nil' then
+    student_id = args["student_id"];
+else
+    student_id = ngx.var.cookie_person_id;
+end
 --拼学生条件
 local person_str =""
 person_str = "filter=STUDENT_ID,"..student_id..";"
@@ -274,7 +278,7 @@ for i=1,#zy do
 			curr_path = string.sub(curr_path,0,#curr_path-2)
 			--判断当前作业有没有主观题
 			--获取学生主观题答题信息
-			local subjective,err = ssdb:hscan("zy_zg_answer_img"..student_id.."_"..relate[2],"","",100)
+			local subjective,err = ssdb:hscan("homework_answersubjective_"..student_id.."_"..relate[2],"","",100)
 			if not subjective then
 					say("{\"success\":false,\"info\":\"学生答题查询失败！\"}")
 					return

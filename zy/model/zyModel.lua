@@ -11,54 +11,60 @@ function _ZyModel:save_zy_parse_paper(paper_list)
 	local cjson = require "cjson"
 	local paper_info = {};
 	if paper_list[1] and paper_list[1].paper_source == "1" then
-		local zgs={};--格式化试卷中主观题信息
-		local zg_flag=1;
-		local kgs={};--格式化试卷中客观题信息
-		local kg_flag=1;
-		local papers = ngx.location.capture("/dsideal_yy/teacher/zy/papertitlelist",{
-							body="paper_id_char="..paper_list[1].paper_id
-					   });--改之后的获取格式化试卷信息
-		local paper;
-		if papers.status == 200 then
-			paper = cjson.decode(papers.body).table_List;
-		else
-			say("{\"success\":false,\"info\":\"查询试卷信息错误！\"}")
-			return
-		end
-		if paper then
-            for i=1,#paper do
-                --判断是客观题还是主观题
-                if paper[i].kg_zg=="1" and tonumber(paper[i].question_type_id) ~= 14 then
-                    local kg={};
-                    kg["file_id"]=paper[i].file_id;
-                    kg["question_answer"]=paper[i].question_answer;
-                    kg["question_type_id"]=paper[i].question_type_id;
-                    kg["kg_zg"]=1;
-                    kg["question_id_char"]=paper[i].question_id_char;
-                    kg["option_count"]=paper[i].option_count;
-                    kgs[kg_flag]=kg;
-                    kg_flag=kg_flag+1;
-                else
-                    local zg={};
-                    zg["file_id"]=paper[i].file_id;
-                    zg["question_answer"]=paper[i].question_answer;
-                    zg["question_type_id"]=paper[i].question_type_id;
-                    zg["kg_zg"]=2;
-                    zg["question_id_char"]=paper[i].question_id_char;
-                    zg["option_count"]=paper[i].option_count;
-                    zgs[zg_flag]=zg;
-                    zg_flag=zg_flag+1;
-                end
-            end
-        end
-		paper_info.zg = zgs;
-		paper_info.kg = kgs;
+        paper_info = _ZyModel:get_gs_question_paper(paper_list[1].paper_id);
 	end
 	---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	if paper_list[1] and paper_list[1].paper_source == "2" then
 		paper_info.fgsh = paper_list; --非格式化试卷
 	end
 	return paper_info;
+end
+function _ZyModel:get_gs_question_paper(paper_id)
+    local cjson = require "cjson"
+    local paper_info = {};
+    local zgs={};--格式化试卷中主观题信息
+    local zg_flag=1;
+    local kgs={};--格式化试卷中客观题信息
+    local kg_flag=1;
+    local papers = ngx.location.capture("/dsideal_yy/ypt/zy/papertitlelist",{
+        body="paper_id_char="..paper_id
+    });--改之后的获取格式化试卷信息
+    local paper;
+    if papers.status == 200 then
+        paper = cjson.decode(papers.body).table_List;
+    else
+        return {};
+    end
+    
+    if paper then
+        for i=1,#paper do
+            --判断是客观题还是主观题
+            if paper[i].kg_zg=="1" and tonumber(paper[i].question_type_id) ~= 14 then
+                local kg={};
+                kg["file_id"]=paper[i].file_id;
+                kg["question_answer"]=paper[i].question_answer;
+                kg["question_type_id"]=paper[i].question_type_id;
+                kg["kg_zg"]=1;
+                kg["question_id_char"]=paper[i].question_id_char;
+                kg["option_count"]=paper[i].option_count;
+                kgs[kg_flag]=kg;
+                kg_flag=kg_flag+1;
+            else
+                local zg={};
+                zg["file_id"]=paper[i].file_id;
+                zg["question_answer"]=paper[i].question_answer;
+                zg["question_type_id"]=paper[i].question_type_id;
+                zg["kg_zg"]=2;
+                zg["question_id_char"]=paper[i].question_id_char;
+                zg["option_count"]=paper[i].option_count;
+                zgs[zg_flag]=zg;
+                zg_flag=zg_flag+1;
+            end
+        end
+    end
+    paper_info.zg = zgs;
+    paper_info.kg = kgs;
+    return paper_info;
 end
 --[[
 	局部函数：保存学生和作业对应关系
@@ -155,7 +161,9 @@ function _ZyModel:save_student_zy_relate(zy_id,subject_id,teacher_id,class_id_ar
 				return
 			end
 		end
-	end
+    end
+    db:set_keepalive(0,v_pool_size)
+    ssdb:set_keepalive(0,v_pool_size);
 end
 --[[
 	局部函数：获得所有错题的试题ID
@@ -176,7 +184,7 @@ function _ZyModel:get_zy_answer_question_info(student_id,zy_id)
 		    local answer_array = Split(answer_info[j+1],"_");
 			local stu_answer = answer_array[1];
 			local question_answer = answer_array[2];
-            ngx.log(ngx.ERR,"#####stu_answer:"..stu_answer.."|question_answer:"..question_answer)
+            --ngx.log(ngx.ERR,"#####stu_answer:"..stu_answer.."|question_answer:"..question_answer)
 			if stu_answer ~= question_answer then
 				wrong_question_infos = wrong_question_infos..question_id.."_"..stu_answer..","; --"格式：2323_A,2234_B,2356_C   错题id_学生答案"
 			else
@@ -221,5 +229,28 @@ function _ZyModel:get_zy_zg_question_ids(zy_id)
     return zg_list;
 end
 
+--[[
+	局部函数：获得作业所下发的学生
+	zy_id：作业ID
+]]
+function _ZyModel:getStudentByZyId(zy_id)
+    local DbUtil = require "yxx.tool.DbUtil";
+    local PersonModel = require "base.person.model.PersonInfoModel";
+    local db = DbUtil:getMysqlDb();
+    local ssdb = DbUtil:getSSDb();
+    local sql = "SELECT SQL_NO_CACHE id FROM t_zy_info_sphinxse  WHERE query=\'filter=zy_id,"..zy_id.."\';";
+    local zy = db:query(sql);
+    local student_table = {};
+    for i=1,#zy do
+        local relate= ssdb:multi_hget("homework_zy_student_relate_"..zy[i]["id"],"student_id");
+        local vo = {};
+        vo.student_id = relate[2];
+        vo.student_name = PersonModel:getPersonName(relate[2],6);
+        table.insert(student_table,vo);
+    end
+    db:set_keepalive(0,v_pool_size)
+    ssdb:set_keepalive(0,v_pool_size);
+    return student_table;
+end
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 return _ZyModel;

@@ -119,7 +119,7 @@ if query_type == "3" then
 			zyids=zyids..","..zy[i].iid
 		end	
 	end
-    --ngx.log(ngx.ERR,"###############"..zyids);
+    ngx.log(ngx.ERR,"###############"..zyids);
 	if string.len(zyids)>0 then
 		local zys = ngx.location.capture("/dsideal_yy/resource/getResourceInfoByInfoId",{
 	        	--body="resource_info_ids="..zyids

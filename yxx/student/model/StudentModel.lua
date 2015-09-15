@@ -11,15 +11,16 @@ local _Group = {};
 function _Group:getPersonTableArrs(class_ids,group_ids)
     local person_table_arrs = {};
     local studentModel = require "base.student.model.Student";
-    --按班级留预习
+    --todo 按班级留预习 start
     if class_ids and string.len(class_ids)>0 then
-        --todo 通过班级ID查询学生
+        --todo 通过班级ID查询学生 end
         person_table_arrs = studentModel:getStudentByClassIds(class_ids);
     end
-    --按组留预习
+    --todo 按组留预习 start
     if group_ids and string.len(group_ids)>0 then
-        --todo 通过组ID查询学生
+
     end
+    --todo 组留预习 end
     return person_table_arrs;
 end
 -- 返回_Game对象

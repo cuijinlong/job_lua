@@ -55,13 +55,15 @@ local tabs1={}
 --组信息列表
 local grouplist="[]"
 if student_group[1]~="ok" then
-	for j=1,#student_group,2 do  
-		local tab1={}
-		tab1.group_id=student_group[j]
-		tab1.group_name=ngx.decode_base64(student_group[j+1])
-		id=id+1
-		tabs1[id]=tab1
-	end
+	for j=1,#student_group,2 do
+        if not group_id or tonumber(group_id) ~= tonumber(student_group[j]) then
+            local tab1={}
+            tab1.group_id=student_group[j]
+            tab1.group_name=ngx.decode_base64(student_group[j+1])
+            id=id+1
+            tabs1[id]=tab1
+        end
+    end
 	grouplist=cjson.encode(tabs1)
 end
 

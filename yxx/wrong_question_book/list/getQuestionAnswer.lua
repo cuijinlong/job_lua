@@ -37,7 +37,7 @@ db:connect{
 
 local query_condition = "";
 if class_id ~= "nil" then
-    query_condition = " and class_id like '%,"..class_id..",%'"
+    --query_condition = " and class_id like '%,"..class_id..",%'"
 elseif teacher_id ~= "nil" then
     query_condition = " and teacher_id="..teacher_id;
 end
@@ -61,7 +61,6 @@ for i=1,#hdzy_res do
 	local dtype = hdzy_res[i]["dtype"]
 	local file_path = hdzy_res[i]["file_path"]
 	local tj_question_id = hdzy_res[i]["tj_question_id"]
-	
 	result["class_id"] = class_id
 	result["teacher_id"] = teacher_id
 	result["question_id"] = question_id

@@ -22,14 +22,12 @@ for i=1,#rows do
     local teacher_id = rows[i]["teacher_id"];
     local zy_name = rows[i]["zy_name"];
     local create_time = rows[i]["create_time"];
-    local is_public = 0;
+    local is_public = 1;
     local scheme_id = 0;
     local structure_id = 0;
     local char_id = cache:hmget("t_resource_structure_"..structure_id,"structure_id_char","scheme_id_char");
     local structure_id_char = char_id[1];
     local scheme_id_char = char_id[2];
-    --作业ID在导数据之前，看一下ssdb中生成zy_id的缓存的增长情况 附中的zy_id+缓存的zy_id
-
     param.zy_id = zy_id;
     param.subject_id = subject_id;
     param.teacher_id = teacher_id;
@@ -40,21 +38,15 @@ for i=1,#rows do
     param.structure_id = structure_id;
     param.structure_id_char = structure_id_char;
     param.scheme_id_char = scheme_id_char;
+    local paper_info = ZyModel:save_zy_parse_paper(paper_id);
+    param.zg = paper_info.zg;--格式化试卷主观题信息
+    param.kg = paper_info.kg;--格式化试卷客观题信息
     param.zy_content = "";
     param.is_look_answer = "1";
     param.is_download = "1";
     param.group_id_arrs = "";
     param.create_or_update = "";
     param.zy_fj_list = {};
-
-    --获得本次作业的试卷中试题的信息start。
-    local paper_info = ZyModel:save_zy_parse_paper(paper_id);
-    param.zg = paper_info.zg;--格式化试卷主观题信息
-    param.kg = paper_info.kg;--格式化试卷客观题信息
-    --获得本次作业的试卷中试题的信息end。
-
-
-    --获得教师任教的班级
     local personDetail = PersonInfoModel.getPersonDetail(self,teacher_id, 5);
     param["teacher_name"] = personDetail.person_name;
     ZyModel:save_student_zy_relate(zy_id,subject_id,teacher_id,param.class_id_arrs,"");--获取作业班级对象

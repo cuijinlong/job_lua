@@ -66,7 +66,7 @@ function _StatModel:wk_count()
     return json;
 end
 
-function _StatModel:get_moudel_subject(student_id)
+function _StatModel:get_moudel_subject_new(student_id)
     --初始化变量
     local dbUtil = require "yxx.tool.DbUtil";
     local cjson = require "cjson";
@@ -79,19 +79,112 @@ function _StatModel:get_moudel_subject(student_id)
     local zt_sql = "SELECT SUBJECT_ID AS topic_subject FROM t_yxx_topic GROUP BY SUBJECT_ID";
     local yx_sql = "SELECT SUBJECT_ID as game_subject FROM t_yxx_game GROUP BY SUBJECT_ID";
     local ct_sql = "SELECT SUBJECT_ID AS wq_subject from t_wrong_question_book where STUDENT_ID="..student_id.." GROUP BY wq_subject";
+    local yx_cp_sql = "SELECT t2.SUBJECT_ID as yx_cp_subject from t_yx_person t1 INNER JOIN t_yx_info t2 on t1.yx_id = t2.yx_id where t1.person_id="..student_id.." and t1.identity_id=6 GROUP BY zy_subject;";
     local zy_rows = mysql_db:query(zy_sql);
     local wk_rows = mysql_db:query(wk_sql);
     local zt_rows = mysql_db:query(zt_sql);
     local yx_rows = mysql_db:query(yx_sql);
     local ct_rows = mysql_db:query(ct_sql);
+    local yx_cp_rows = mysql_db:query(yx_cp_sql);
     json.zy_subject_ids = zy_rows;
     json.wk_subject_ids = wk_rows;
     json.zt_subject_ids = zt_rows;
     json.yx_subject_ids = yx_rows;
     json.ct_subject_ids = ct_rows;
+    json.yx_cp_subject_ids = yx_cp_rows;
     mysql_db:set_keepalive(0,v_pool_size);
     return json;
 end
+
+function _StatModel:get_moudel_subject(student_id)
+    --初始化变量
+    local dbUtil = require "yxx.tool.DbUtil";
+    local cjson = require "cjson";
+    local redis = require "resty.redis"
+    local cache = redis:new()
+    local ok,err = cache:connect(v_redis_ip,v_redis_port)
+    if not ok then
+        ngx.say("{\"success\":\"false\",\"info\":\""..err.."\"}")
+        return
+    end
+    local ssdb_db = dbUtil:getSSDb();
+    local mysql_db = dbUtil:getMysqlDb();
+    local json = {};
+    local zy_sql = "SELECT SQL_NO_CACHE id  FROM t_zy_info_sphinxse  WHERE query='filter=student_id,"..student_id..";groupby=attr:subject_id;groupsort=subject_id asc'"
+    local wk_sql = "SELECT SQL_NO_CACHE id  FROM t_wkds_wktostudent_sphinxse  WHERE query='filter=student_id,"..student_id..";groupby=attr:subject_id;;groupsort=subject_id asc'"
+    local zt_sql = "SELECT SUBJECT_ID AS topic_subject FROM t_yxx_topic GROUP BY SUBJECT_ID";
+    local yx_sql = "SELECT SUBJECT_ID as game_subject FROM t_yxx_game GROUP BY SUBJECT_ID";
+    local ct_sql = "SELECT SUBJECT_ID AS wq_subject from t_wrong_question_book where STUDENT_ID="..student_id.." GROUP BY wq_subject";
+    local yx_cp_sql = "SELECT SQL_NO_CACHE id  FROM t_yx_person_sphinxse  WHERE query='filter=participantor_id,"..student_id..";filter=participantor_identity,6;groupby=attr:subject_id;;groupsort=subject_id asc'"
+    -- todo 作业的学科分组 start
+    local zy_rows = mysql_db:query(zy_sql);
+    local zy_table = {};
+    local str = ",";
+    for i=1,#zy_rows do
+
+        local relate= ssdb_db:multi_hget("homework_zy_student_relate_"..zy_rows[i]["id"],"zy_id");
+        local zylist=ssdb_db:hget("homework_zy_content",relate[2]);
+        if string.len(zylist[1]) ~= 25 and string.len(zylist[1])>0 then
+            local zycontent=zylist[1];
+            local zycon=cjson.decode(zycontent);
+            if string.find(str, ","..tostring(zycon.subject_id)..",") == nil then
+                str = str..tostring(zycon.subject_id)..",";
+            end
+        end
+    end
+    local subject_id_table = {};
+    if str ~= "," then
+       str = string.sub(str,2,string.len(str)-1);
+       subject_id_table = Split(str,",");
+    end
+    for i=1,#subject_id_table do
+        local zy_table_temp = {};
+        zy_table_temp.zy_subject = tonumber(subject_id_table[i]);
+        table.insert(zy_table,zy_table_temp);
+    end
+
+    -- todo 作业的学科分组 end
+
+
+    -- todo 微课的学科分组 start
+    local wk_rows = mysql_db:query(wk_sql);
+    local wk_table = {};
+    for i=1,#wk_rows do
+        local wk_table_temp = {};
+        local wktostudent_info = ssdb_db:multi_hget("wktostudent_"..wk_rows[i]["id"],"wkds_id");
+        local wkds_value = cache:hmget("wkds_"..wktostudent_info[2],"subject_id");
+        wk_table_temp.wk_subject = tonumber(wkds_value[1]);
+        table.insert(wk_table,wk_table_temp);
+    end
+    -- todo 微课的学科分组 end
+
+    -- todo 预习的学科分组 start
+    local yx_cp_rows = mysql_db:query(yx_cp_sql);
+    local yx_cp_table = {};
+    for i=1,#yx_cp_rows do
+        local yx_cp_table_temp = {};
+        local yxtoperson_tab = ssdb_db:multi_hget("yxx_yxtoperson_"..yx_cp_rows[i]["id"],"yx_id"); --rows[i].id：预习人员表的ID
+        local yx_cp_value = ssdb_db:multi_hget("yx_moudel_info_"..yxtoperson_tab[2],"subject_id");
+        yx_cp_table_temp.yx_cp_subject = tonumber(yx_cp_value[2]);
+        table.insert(yx_cp_table,yx_cp_table_temp);
+    end
+    -- todo 预习的学科分组 end
+
+    local zt_rows = mysql_db:query(zt_sql);
+    local yx_rows = mysql_db:query(yx_sql);
+    local ct_rows = mysql_db:query(ct_sql);
+    json.zy_subject_ids = zy_table;
+    json.wk_subject_ids = wk_table;
+    json.zt_subject_ids = zt_rows;
+    json.yx_subject_ids = yx_rows;
+    json.ct_subject_ids = ct_rows;
+    json.yx_cp_subject_ids = yx_cp_table;
+    mysql_db:set_keepalive(0,v_pool_size);
+    ssdb_db:set_keepalive(0,v_pool_size);
+    cache:set_keepalive(0,v_pool_size)
+    return json;
+end
+
 
 -- 返回_StatModel对象
 return _StatModel;

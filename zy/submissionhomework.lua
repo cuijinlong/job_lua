@@ -100,20 +100,20 @@ if subjective[1]~="ok" then
 	ssdb:multi_hset("homework_zy_student_relate_"..relate[1],"flat",1)
 	--更改作业状态mysql
 	local res, err, errno, sqlstate =db:query("update t_zy_zytostudent set FLAT=\'1\'  where ID="..relate[1])
-    if not res then
-        ngx.say("bad result: ", err, ": ", errno, ": ", sqlstate, ".")
-        return
-    end
+        if not res then
+                ngx.say("bad result: ", err, ": ", errno, ": ", sqlstate, ".")
+                return
+        end
 else
 	--更改作业状态
-    ssdb:multi_hset("homework_zy_student_relate_"..relate[1],"flat",2)
-    --更改作业状态mysql
+        ssdb:multi_hset("homework_zy_student_relate_"..relate[1],"flat",2)
+        --更改作业状态mysql
 	--ngx.say(relate[1].."---")
-    local res, err, errno, sqlstate =db:query("update t_zy_zytostudent set FLAT=\'2\'  where ID="..relate[1])
-    if not res then
-            ngx.say("bad result: ", err, ": ", errno, ": ", sqlstate, ".")
-            return
-    end
+        local res, err, errno, sqlstate =db:query("update t_zy_zytostudent set FLAT=\'2\'  where ID="..relate[1])
+        if not res then                
+                ngx.say("bad result: ", err, ": ", errno, ": ", sqlstate, ".")                
+                return        
+        end
 end
 
 local res, err, errno, sqlstate =db:query("update t_zy_info set UPDATE_TS=\'"..ts.."\'  where ID="..zy_id)
@@ -203,9 +203,10 @@ if answer[1]~="ok" then
                         return
                 end
                 if string.len(falseperson[1])>0 then
-                    ssdb:hset("homework_count_answerperson_byzyid_"..zy_id.."_"..file_id,sids[1],falseperson[1]..","..student_id)
+
+                        ssdb:hset("homework_count_answerperson_byzyid_"..zy_id.."_"..file_id,sids[1],falseperson[1]..","..student_id)
                 else
-                    ssdb:hset("homework_count_answerperson_byzyid_"..zy_id.."_"..file_id,sids[1],student_id)
+                        ssdb:hset("homework_count_answerperson_byzyid_"..zy_id.."_"..file_id,sids[1],student_id)
                 end
                 --按班统计回答这题一样答案的人
                 local falseperson = ssdb:hget("homework_count_answerperson_byclassid_"..class_id.."_"..zy_id.."_"..file_id,sids[1])

@@ -154,27 +154,8 @@ function _PreparationModel:yxList(subject_id,prson_id,identity_id,yx_name,struct
     end
     local yxListJson = {success=true,total_row=total_row,total_page=total_page,page_number=page_number,page_size=page_size,list=yxVoArray};
     MysqlUtil:close(mysql_db);
-return yxListJson;
+    return yxListJson;
 end
-
-
---[[
-	局部函数：将创建预习页面的渲染JSON保持SSDB
-]]
-function _PreparationModel:saveYxToSsdb(yx_id,param)
-    local SSDBUtil = require "yxx.tool.SSDBUtil";
-    SSDBUtil:hset("preparation_yx_info",yx_id,param);
-end
-
---[[
-	局部函数：将创建预习页面的渲染JSON保持SSDB
-]]
-function _PreparationModel:getYxSsdb(yx_id,param)
-    local SSDBUtil = require "yxx.tool.SSDBUtil";
-    local param = SSDBUtil:hget("preparation_yx_info",yx_id);
-    return param;
-end
-
 --[[
 	局部函数：修改预习主表信息，yx_table是要修改字段的键值对表.
 ]]
@@ -187,16 +168,61 @@ function _PreparationModel:updateYx(yx_id,yx_table)
    MysqlUtil:query(update_sql);
    MysqlUtil:close(db)
 end
-
 --[[
 	局部函数：删除预习
+	参数：yx_id 预习ID cp_type_id 预习在测评模块中属于分类“2”
 ]]
 function _PreparationModel:delYxInfo(yx_id,cp_type_id)
-    local sql = "START TRANSACTION;delete FROM t_yx_info where yx_id="..yx_id..
-            ";delete from t_cp_info where bus_id="..yx_id.." and cp_type_id="..cp_type_id..
-            ";COMMIT;";
     local DBUtil = require "common.DBUtil";
+    local db = DBUtil:getDb();
+    local SSDDB = require "yxx.tool.DbUtil";
+    local ssdb_db = SSDDB:getSSDb();
+    local rows = db:query("SELECT SQL_NO_CACHE id FROM t_yx_person_sphinxse WHERE query=\'filter=yx_id,"..yx_id.."\';SHOW ENGINE SPHINX  STATUS;");
+    -- todo 删除预习发布给学生 start
+    for i=1,#rows do
+        ssdb_db:hclear("yxx_yxtoperson_"..rows[i].id);
+    end
+    -- todo 删除预习发布给学生 end
+    local sql = "START TRANSACTION;delete FROM t_yx_info where yx_id="..yx_id..
+                ";delete from t_cp_info where bus_id="..yx_id.." and cp_type_id="..cp_type_id..
+                ";COMMIT;";
+    ssdb_db:hdel("preparation_yx_info",yx_id);
+    ssdb_db:hclear("yx_moudel_info_"..yx_id);
+    ssdb_db:del("yx_student_submit_count_"..yx_id);
+    ssdb_db:set_keepalive(0,v_pool_size);
     return DBUtil:querySingleSql(sql);
 end
-
+--[[
+	局部函数：统计预习中每个环节中素材的浏览/讨论总数
+	参数：yx_id：预习ID
+]]
+function _PreparationModel:getYxMaterialStat(yx_id)
+    local cjson = require "cjson";
+    local SSDBUtil = require "yxx.tool.SSDBUtil";
+    local materialModel = require "yxx.preparation.material.model.MaterialModel";
+    local ssdb_db = SSDBUtil:getDb();
+    local yx_detail_encode = ssdb_db:hget("preparation_yx_info",yx_id);
+    local yx_detail_table = {};
+    if yx_detail_encode ~= "ok" and yx_detail_encode[1] and string.len(yx_detail_encode[1])>0 then
+        yx_detail_table = cjson.decode(yx_detail_encode[1]);
+        if yx_detail_table then
+            local train_list = yx_detail_table.train_list;
+            if #train_list>0 then
+                for i=1,#train_list do
+                    local material_list = train_list[i].material_list;
+                    for j=1,#material_list do
+                        local material_id = material_list[j].material_id;
+                        material_list[j].view_count = materialModel:getStatMaterialOperate(material_id,1);
+                        material_list[j].discuss_count = materialModel:getStatMaterialOperate(material_id,2);
+                        material_list[j].download_count = materialModel:getStatMaterialOperate(material_id,3);
+                    end
+                end
+            else
+                yx_detail_table = {"success",false,"info","该预习中不包含预习环节"};
+            end
+        end
+    end
+    SSDBUtil:keepAlive();
+    return yx_detail_table;
+end
 return _PreparationModel;

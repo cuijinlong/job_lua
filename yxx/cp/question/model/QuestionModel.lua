@@ -42,5 +42,12 @@ function _Question:getQuestionInsertSqlTable(cp_question_table_arrs)
     end
     return question_insert_sql_arrs;
 end
-
+--[[
+	局部函数：组装测评模块试题的insert语句
+]]
+function _Question:getQuestionList(paper_id)
+    local ZyModel = require "zy.model.zyModel";
+    local paper_info = ZyModel:get_gs_question_paper(paper_id);
+    return paper_info;
+end
 return _Question;

@@ -342,7 +342,6 @@ function _WrongQuestion:class_wq_list(class_id,subject_id,knowledge_point_code,q
         query_condition = query_condition.." and (knowledge_point_codes like '%,"..knowledge_point_code..",%' or knowledge_point_codes ='') ";
 	end
 
-    
 	if sort_type == 1 then
 		if sort_num == 1 then
 			query_order = " ORDER BY last_wrong_time DESC";

@@ -21,7 +21,7 @@ function _Person:getPersonInsertSqlTable(yx_id,person_table)
             person_vo.id = tonumber(yxtoperson_id);
             person_vo.yx_id = tonumber(yx_id);
             person_vo.person_id = tonumber(person_table[i].STUDENT_ID);
-            person_vo.identity_id = 6;
+                person_vo.identity_id = 6;
             person_vo.bureau_id = tonumber(person_table[i].BUREAU_ID);
             person_vo.class_id = tonumber(person_table[i].CLASS_ID);
             if person_table.group_id and string.len(person_table.group_id)>0 then
@@ -30,6 +30,7 @@ function _Person:getPersonInsertSqlTable(yx_id,person_table)
             person_vo.submit_state = 0;
             person_vo.update_ts = update_ts;
             local k_v_table = tableUtil:convert_sql(person_vo);
+            --组装insert语句
             if i == 1 then
                 person_insert_sql = "insert into t_yx_person("..k_v_table["k_str"]..") values ";
             elseif i == #person_table then
@@ -37,7 +38,7 @@ function _Person:getPersonInsertSqlTable(yx_id,person_table)
             else
                 person_insert_sql = person_insert_sql.." ("..k_v_table["v_str"].."),";
             end
-            ssdb:multi_hset("yxtoperson_"..yxtoperson_id, "yx_id", yx_id);
+            SSDBUtil:multi_hset("yxx_yxtoperson_"..yxtoperson_id,person_vo);
         end
     end
     SSDBUtil:keepAlive();
@@ -53,6 +54,14 @@ function _Person:delYxPerson(yx_id,cp_type_id)
                 "delete FROM t_yx_person where yx_id="..yx_id.." and person_id<>0;"..
                 "delete from t_cp_person where bus_id="..yx_id.." and cp_type_id="..cp_type_id.." and person_id<>0;"..
                 "COMMIT;";
+    local DBUtil = require "common.DBUtil";
+    DBUtil:querySingleSql(sql);
+end
+
+function _Person:getYxSubmitInfo(yx_id)
+    local sql = "START TRANSACTION;"..
+            "delete FROM t_yx_person where yx_id="..yx_id.." and person_id<>0;"..
+            "COMMIT;";
     local DBUtil = require "common.DBUtil";
     DBUtil:querySingleSql(sql);
 end

@@ -31,11 +31,4 @@ function _Train:getTrainInsertSqlArrstable(train_table_arrs)
     end
     return sql_table;
 end
---[[
-	局部函数：提交预习
-]]
-function _Train:get_yx_detail(yx_id,person_id,identity_id)
-
-end
-
 return _Train;

@@ -60,6 +60,11 @@ function _StringUtil:trim (s)
     return (string.gsub(s, "^%s*(.-)%s*$", "%1"))
 end
 
+--加码
+function _StringUtil:urlEncode(s)
+    s = string.gsub(s, "([^%w%.%- ])", function(c) return string.format("%%%02X", string.byte(c)) end)
+    return string.gsub(s, " ", "+")
+end
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 return _StringUtil;

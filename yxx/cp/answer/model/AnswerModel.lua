@@ -26,7 +26,7 @@ function _Answer:SetAnswerQuestion(table)
     local db = MysqlUtil:getDb();
     local k_v_table = tableUtil:convert_sql(table);
     local query_sql = "replace into t_cp_answer("..k_v_table["k_str"]..") value("..k_v_table["v_str"]..");";
-    MysqlUtil:query(query_sql);
+    db:query(query_sql);
     SSDBUtil:multi_hset("yxx_cp_answer_question_"..table.cp_id.."_"..table.question_id.."_"..table.identity_id.."_"..table.person_id,table);
     MysqlUtil:close(db);
     SSDBUtil:keepAlive();
@@ -37,7 +37,7 @@ end
 ]]
 function _Answer:GetAnswerQuestion(cp_id,question_id,identity_id,person_id)
     local SSDBUtil = require "yxx.tool.SSDBUtil";
-    local answerQuestionDetail = SSDBUtil:multi_hget_hash("yxx_cp_answer_question_"..cp_id.."_"..question_id.."_"..identity_id.."_"..person_id,"question_id","answer","is_full_score");
+    local answerQuestionDetail = SSDBUtil:multi_hget_hash("yxx_cp_answer_question_"..cp_id.."_"..question_id.."_"..identity_id.."_"..person_id,"question_id","person_answer","is_full_score");
     SSDBUtil:keepAlive();
     return answerQuestionDetail;
 end
@@ -48,11 +48,13 @@ end
 function _Answer:DelAnswerQuestion(table)
     local MysqlUtil = require "yxx.tool.MysqlUtil";
     local SSDBUtil = require "yxx.tool.SSDBUtil";
+    local ssdb = SSDBUtil:getDb();
     local db = MysqlUtil:getDb();
     local query_sql = "delete from t_cp_answer where cp_id="..table.cp_id.." and question_id="..table.question_id.." and identity_id="..table.identity_id.." and person_id="..table.person_id;
     MysqlUtil:query(query_sql);
-    SSDBUtil:hclear("yxx_cp_answer_question_"..table.cp_id.."_"..table.question_id.."_"..table.identity_id.."_"..table.person_id);
+    ssdb:hclear("yxx_cp_answer_question_"..table.cp_id.."_"..table.question_id.."_"..table.identity_id.."_"..table.person_id);
     MysqlUtil:close(db);
     SSDBUtil:keepAlive();
 end
+
 return _Answer;

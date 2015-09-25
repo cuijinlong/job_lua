@@ -6,9 +6,6 @@ local _WrongQuestion = {};
 	局部函数：错题录入错题本
 	ssdb_info：错题记录信息
 ]]
-local log = require("social.common.log")
-log.outfile = "/tmp/yxx.log";
-log.level="trace"
 function _WrongQuestion:wq_save(ssdb_info)
 	local dbUtil = require "yxx.wrong_question_book.util.DbUtil";
 	local ssdb_db = dbUtil:getSSDb();
@@ -152,7 +149,7 @@ function _WrongQuestion:wq_rate(class_id,question_id,subject_id,knowledge_point_
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
 	--获得本班针对此题的作答情况
 	local wrong_question_info = ssdb_db:multi_hget("wrong_question_rate_v34_"..class_id.."_"..question_id, "wrong_count","right_count");
-    ngx.log(ngx.ERR,"###########"..is_wrong_right.."##############");
+    --ngx.log(ngx.ERR,"###########"..is_wrong_right.."##############");
     if #wrong_question_info > 0 and wrong_question_info[1] ~= "ok" then
 		if is_wrong_right == 0 then
 			right_count = tonumber(wrong_question_info[4]);

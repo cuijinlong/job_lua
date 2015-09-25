@@ -70,6 +70,20 @@ function _SSDBUtil.incr(self, name)
         return result[1];
     end
 end
+---------------------------------------------------------------------------
+
+function _SSDBUtil.hsize(self, name)
+
+    local ssdb   = self:getDb();
+    local result, err = ssdb: hsize(name);
+    self:_keepAlive();
+    if not result then
+        return false;
+    else
+        return result[1];
+    end
+end
+
 
 ---------------------------------------------------------------------------
 
@@ -93,6 +107,17 @@ function _SSDBUtil.hget(self, name, key)
     end
     return result;
 end
+---------------------------------------------------------------------------
+function _SSDBUtil.hscan(self,name,size)
+    local ssdb   = self:getDb();
+    local result, err = ssdb: hscan(name,'','',size);
+    self:_keepAlive();
+    if not result then
+        ngx.log(ngx.ERR, "结果：[", cjson.encode(result), "], err:[", err, "]");
+    end
+    return result;
+end
+
 ---------------------------------------------------------------------------
 
 function  _SSDBUtil.multi_hset(self, name, kvTable)

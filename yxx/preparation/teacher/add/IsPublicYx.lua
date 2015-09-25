@@ -34,7 +34,7 @@ if tonumber(is_public) == 0 then
     if tonumber(isCanCancel) == 0 then
         yxPersonModel:delYxPerson(yx_id,2);--todo删除 cp_person yx_person
     else
-        say("{\"success\":false,\"info\":\"已经有学生作答不能取消发布.\"}");
+        say("{\"success\":false,\"info\":\"已经有学生作答不能取消发布!\"}");
         return;
     end
 
@@ -43,6 +43,10 @@ if tonumber(is_public) == 0 then
     yx_update_table.is_public = 0;
     preparetionModel:updateYx(yx_id,yx_update_table);
     -- todo 更新数据库 end
+
+    -- todo 预习中素材操作统计重置 start
+    preparetionModel:resetMaterialStatByYxId(yx_id);
+    -- todo 预习中素材操作统计重置 end
 
     -- todo 更新缓存 start
     local yx_table = SSDBUtil:multi_hget_hash("yx_moudel_info_"..yx_id,"yx_id","yx_name","create_time","person_id","identity_id","scheme_id","structure_id","subject_id","is_public","class_ids","group_ids");
@@ -72,7 +76,6 @@ elseif tonumber(is_public) == 1 then
         yx_update_table.is_public = 1;
         preparetionModel:updateYx(yx_id,yx_update_table);
         -- todo 更新数据库 end
-
         -- todo 更新缓存 start
         local yx_table = SSDBUtil:multi_hget_hash("yx_moudel_info_"..yx_id,"yx_id","yx_name","create_time","person_id","identity_id","scheme_id","structure_id","subject_id","is_public","class_ids","group_ids");
         yx_table.is_public = 1;

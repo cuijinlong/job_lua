@@ -64,10 +64,11 @@ if string.len(cnode) == 0 then
     return
 end
 --关键字处理
-if string.len(yx_name) > 0 then
+if  yx_name and string.len(yx_name) > 0 then
     yx_name = ngx.decode_base64(yx_name) .. ";"
+else
+    yx_name = "";
 end
-
 
 local return_json = preparationModel:yxList(yx_name,person_id, person_identity, subject_id, is_root, scheme_id, structure_id, sort_type, sort_mode, cnode, page_size, page_number);
 

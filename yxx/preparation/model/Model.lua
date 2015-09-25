@@ -200,6 +200,7 @@ function _PreparationModel:getYxMaterialStat(yx_id)
     local cjson = require "cjson";
     local SSDBUtil = require "yxx.tool.SSDBUtil";
     local materialModel = require "yxx.preparation.material.model.MaterialModel";
+    local QuestionModel = require "yxx.cp.question.model.QuestionModel";
     local ssdb_db = SSDBUtil:getDb();
     local yx_detail_encode = ssdb_db:hget("preparation_yx_info",yx_id);
     local yx_detail_table = {};
@@ -212,17 +213,53 @@ function _PreparationModel:getYxMaterialStat(yx_id)
                     local material_list = train_list[i].material_list;
                     for j=1,#material_list do
                         local material_id = material_list[j].material_id;
+                        local cp_id = material_list[j].cp_id;
                         material_list[j].view_count = materialModel:getStatMaterialOperate(material_id,1);
                         material_list[j].discuss_count = materialModel:getStatMaterialOperate(material_id,2);
                         material_list[j].download_count = materialModel:getStatMaterialOperate(material_id,3);
+                        -- todo 判断测评中是否客观题，如果有客观题那么在“预习分析”列表中才出现“详细”按钮 start
+                        if cp_id and string.len(cp_id)> 0 then
+                            local question_list = QuestionModel:getQuestionListByCpId(cp_id);
+                            if question_list and question_list.kg_question_list and #question_list.kg_question_list > 0 then
+                                material_list[j].is_have_kg = 1;
+                            else
+                                material_list[j].is_have_kg = 0;
+                            end
+                        end
+                        -- todo 判断测评中是否客观题，如果有客观题那么在“预习分析”列表中才出现“详细”按钮 end
                     end
                 end
             else
-                yx_detail_table = {"success",false,"info","该预习中不包含预习环节"};
+                yx_detail_table = {"success",false,"yx_name",yx_detail_table.yx_name,"info","该预习中不包含预习环节"};
             end
         end
     end
     SSDBUtil:keepAlive();
     return yx_detail_table;
 end
+
+--[[
+	局部函数：通过yx_id重置获有素材的操作统计
+]]
+function _PreparationModel:resetMaterialStatByYxId(yx_id)
+    local SSDBUtil = require "yxx.tool.SSDBUtil";
+    local ssdb_db = SSDBUtil:getDb();
+    local yx_info = SSDBUtil:hget("preparation_yx_info",yx_id);
+    if yx_info[1] ~= 'ok' then
+        if yx_info.train_list then
+            for i=1,#yx_info.train_list do
+                if yx_info.train_list[i].material_list then
+                    for j=1,#yx_info.train_list[i].material_list do
+                        local material_id = yx_info.train_list[i].material_list[j].material_id;
+                        ssdb_db:set("stat_material_view_count_"..material_id,0);
+                        ssdb_db:set("stat_material_discuss_count_"..material_id,0);
+                        ssdb_db:set("stat_material_download_count_"..material_id,0);
+                    end
+                end
+            end
+        end
+    end
+    SSDBUtil:keepAlive();
+end
+
 return _PreparationModel;

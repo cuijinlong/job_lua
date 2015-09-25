@@ -20,7 +20,6 @@ function _Material:getMaterialVo(train_id,material_table)
     return material_vo;
 end
 
-
 --[[
 	局部函数：组装insert sql语句
 ]]

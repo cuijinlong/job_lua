@@ -24,10 +24,6 @@ if not ok then
 	say("{\"success\":false,\"info\":\""..err.."\"}")        
 	return
 end
-local log = require("social.common.log")
-log.outfile = "/tmp/student.log";
-log.level="trace"
-
 --接受前台的参数
 local request_method = ngx.var.request_method
 local args = nil
@@ -206,7 +202,6 @@ local zy_info = ""
 for i=1,#zy do
 	local page={}
 	--sphinx查询的是关系id，这里查出作业id
-	--ngx.log(ngx.ERR, "@@@@@@@@@@@@@@@@@@@@"..zy[i]["id"].."@@@@@@@@@@@@@@@@@@@@")
 	local relate= ssdb:multi_hget("homework_zy_student_relate_"..zy[i]["id"],"zy_id")
 	
 	local zylist,err=ssdb:hget("homework_zy_content",relate[2])
@@ -216,7 +211,6 @@ for i=1,#zy do
 	end
 	if string.len(zylist[1])>0 then
 		local zycontent=zylist[1]
-		--ngx.log(ngx.ERR, "@@@@@@@@@@@@@@@@@@@@"..string.len(zylist[1]).."@@@@@@@@@@@@@@@@@@@@")
 		local zycon=cjson.decode(zycontent)
 		page["zy_id"]=relate[2]
 		page["zy_name"]=zycon.zy_name

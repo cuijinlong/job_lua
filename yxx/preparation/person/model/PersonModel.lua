@@ -21,7 +21,7 @@ function _Person:getPersonInsertSqlTable(yx_id,person_table)
             person_vo.id = tonumber(yxtoperson_id);
             person_vo.yx_id = tonumber(yx_id);
             person_vo.person_id = tonumber(person_table[i].STUDENT_ID);
-                person_vo.identity_id = 6;
+            person_vo.identity_id = 6;
             person_vo.bureau_id = tonumber(person_table[i].BUREAU_ID);
             person_vo.class_id = tonumber(person_table[i].CLASS_ID);
             if person_table.group_id and string.len(person_table.group_id)>0 then
